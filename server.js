@@ -11,6 +11,7 @@ const password = process.env.PASSWORD || 'defaultPassword';
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 async function createDatabaseFile() {
   try {
     await fs.access(dbFilePath);
@@ -51,7 +52,10 @@ app.post('/saveData', authenticate, async (req, res) => {
     jsonData.push(req.body);
     await fs.writeFile(dbFilePath, JSON.stringify(jsonData, null, 2));
 
-    res.json({ success: true, message: 'Data saved successfully.' });
+    const jsonResponse = { success: true, message: 'Data saved successfully.' };
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(jsonResponse, null, 2));
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'An error occurred in reading the data.' });
@@ -63,7 +67,8 @@ app.post('/data', authenticate, async (req, res) => {
     const currentData = await fs.readFile(dbFilePath, 'utf-8');
     const jsonData = JSON.parse(currentData);
 
-    res.json(jsonData);
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(jsonData, null, 2));
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'An error occurred in reading the data.' });
